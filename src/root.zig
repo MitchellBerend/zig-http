@@ -39,3 +39,9 @@ pub const middleware = struct {
 
     pub const log = middleware_mod.@"log ";
 };
+
+pub const webserver = struct {
+    const webserver_mod = @import("zig_http/webserver/mod.zig");
+
+    pub const Server = webserver_mod.Server;
+};
