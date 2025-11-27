@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn find_headers(allocator: std.mem.Allocator, request: []const u8) !std.StringHashMap([]const u8) {
+pub fn find_headers(allocator: std.mem.Allocator, request: []const u8) error{OutOfMemory}!std.StringHashMap([]const u8) {
     var headers: std.StringHashMap([]const u8) = std.StringHashMap([]const u8).init(allocator);
     var lines = std.mem.splitScalar(u8, request, '\n');
     _ = lines.first();

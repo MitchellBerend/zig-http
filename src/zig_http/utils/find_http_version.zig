@@ -2,9 +2,9 @@ const std = @import("std");
 
 pub const HttpVersion = enum { HTTP09, HTTP10, HTTP11, HTTP2, HTTP3 };
 
-pub const HttpVersionError = error{ NotFound, Malformed };
+pub const HttpVersionError = error{ HttpVersionNotFound, HttpVersionMalformed };
 
-pub fn find_http_version(request: []const u8) !HttpVersion {
+pub fn find_http_version(request: []const u8) HttpVersionError!HttpVersion {
     var version: HttpVersion = undefined;
 
     var lines = std.mem.splitScalar(u8, request, '\n');
@@ -13,8 +13,8 @@ pub fn find_http_version(request: []const u8) !HttpVersion {
     var words = std.mem.splitScalar(u8, first_line, ' ');
 
     _ = words.first();
-    _ = words.next() orelse return HttpVersionError.Malformed;
-    const _version = words.next() orelse return HttpVersionError.Malformed;
+    _ = words.next() orelse return HttpVersionError.HttpVersionMalformed;
+    const _version = words.next() orelse return HttpVersionError.HttpVersionMalformed;
 
     if (std.mem.eql(u8, _version, "HTTP/0.9")) {
         version = HttpVersion.HTTP09;
@@ -27,7 +27,7 @@ pub fn find_http_version(request: []const u8) !HttpVersion {
     } else if (std.mem.eql(u8, _version, "HTTP/3")) {
         version = HttpVersion.HTTP3;
     } else {
-        return HttpVersionError.NotFound;
+        return HttpVersionError.HttpVersionNotFound;
     }
 
     return version;

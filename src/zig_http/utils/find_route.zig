@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub const RouteError = error{ NotFound, InvalidRoute };
+pub const RouteError = error{ RouteNotFound, InvalidRoute };
 
 pub fn find_route(request: []const u8) RouteError![]const u8 {
     var route: []const u8 = undefined;
@@ -12,7 +12,7 @@ pub fn find_route(request: []const u8) RouteError![]const u8 {
     const second = words.next();
 
     if (second == null) {
-        return RouteError.NotFound;
+        return RouteError.RouteNotFound;
     }
     route = second.?;
 
@@ -43,7 +43,7 @@ test "no route error" {
         \\GET
     ;
     const result = find_route(message);
-    try std.testing.expectError(RouteError.NotFound, result);
+    try std.testing.expectError(RouteError.RouteNotFound, result);
 }
 
 test "route malformed" {

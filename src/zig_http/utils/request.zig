@@ -5,6 +5,8 @@ const http_route = @import("find_route.zig");
 const http_headers = @import("find_headers.zig");
 const http_version = @import("find_http_version.zig");
 
+pub const RequestError = error{ MethodNotFound, RouteNotFound, InvalidRoute, HttpVersionNotFound, HttpVersionMalformed, OutOfMemory, ParameterMalformed };
+
 pub const Request = struct {
     client_addr: std.net.Address,
     method: http_methods.Method,
@@ -12,7 +14,7 @@ pub const Request = struct {
     headers: std.StringHashMap([]const u8),
     version: http_version.HttpVersion,
 
-    pub fn init(allocator: std.mem.Allocator, client_addr: std.net.Address, request: []const u8) !Request {
+    pub fn init(allocator: std.mem.Allocator, client_addr: std.net.Address, request: []const u8) RequestError!Request {
         const method = try http_methods.find_method(request);
         const route = try http_route.find_route(request);
         const headers = try http_headers.find_headers(allocator, request);

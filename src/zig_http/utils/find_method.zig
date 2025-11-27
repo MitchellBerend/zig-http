@@ -25,9 +25,7 @@ pub const Method = enum {
     }
 };
 
-pub const MethodError = error{NotFound};
-
-pub fn find_method(request: []const u8) MethodError!Method {
+pub fn find_method(request: []const u8) error{MethodNotFound}!Method {
     var return_method: Method = undefined;
 
     var lines = std.mem.splitScalar(u8, request, '\n');
@@ -50,7 +48,7 @@ pub fn find_method(request: []const u8) MethodError!Method {
     } else if (std.mem.eql(u8, method, "OPTIONS")) {
         return_method = Method.OPTIONS;
     } else {
-        return MethodError.NotFound;
+        return error.MethodNotFound;
     }
 
     return return_method;
@@ -77,5 +75,5 @@ test "find_method error" {
         \\Upgrade-Insecure-Requests: 1
     ;
     const result = find_method(message);
-    try std.testing.expectError(MethodError.NotFound, result);
+    try std.testing.expectError(error.MethodNotFound, result);
 }
