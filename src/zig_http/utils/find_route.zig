@@ -3,18 +3,11 @@ const std = @import("std");
 pub const RouteError = error{ RouteNotFound, InvalidRoute };
 
 pub fn find_route(request: []const u8) RouteError![]const u8 {
-    var route: []const u8 = undefined;
-
     var lines = std.mem.splitScalar(u8, request, '\n');
     const first_line = lines.first();
     var words = std.mem.splitScalar(u8, first_line, ' ');
     _ = words.first();
-    const second = words.next();
-
-    if (second == null) {
-        return RouteError.RouteNotFound;
-    }
-    route = second.?;
+    const route = words.next() orelse return RouteError.RouteNotFound;
 
     if (!std.mem.startsWith(u8, route, "/")) {
         return RouteError.InvalidRoute;
