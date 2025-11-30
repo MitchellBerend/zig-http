@@ -1,4 +1,5 @@
 pub const utils = struct {
+    const find_body_file = @import("zig_http/utils/find_body.zig");
     const headers_file = @import("zig_http/utils/find_headers.zig");
     const http_code_file = @import("zig_http/utils/http_codes.zig");
     const http_version_file = @import("zig_http/utils/find_http_version.zig");
@@ -19,6 +20,7 @@ pub const utils = struct {
 
     pub const HttpCode = http_code_file.HttpCode;
 
+    pub const find_body = find_body_file.find_body;
     pub const find_http_version = http_version_file.find_http_version;
     pub const find_method = method_file.find_method;
     pub const find_route = route_file.find_route;
