@@ -7,7 +7,7 @@ pub const HttpVersionError = error{ HttpVersionNotFound, HttpVersionMalformed };
 pub fn find_http_version(request: []const u8) HttpVersionError!HttpVersion {
     var version: HttpVersion = undefined;
 
-    var lines = std.mem.splitScalar(u8, request, '\n');
+    var lines = std.mem.splitAny(u8, request, &[_]u8{ 13, 10 });
     const first_line = lines.first();
 
     var words = std.mem.splitScalar(u8, first_line, ' ');
