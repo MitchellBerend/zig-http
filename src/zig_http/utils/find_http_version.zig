@@ -1,6 +1,21 @@
 const std = @import("std");
 
-pub const HttpVersion = enum { HTTP09, HTTP10, HTTP11, HTTP2, HTTP3 };
+pub const HttpVersion = enum {
+    HTTP09,
+    HTTP10,
+    HTTP11,
+
+    pub fn format(
+        self: @This(),
+        writer: *std.Io.Writer,
+    ) std.Io.Writer.Error!void {
+        switch (self) {
+            HttpVersion.HTTP09 => try writer.print("HTTP/0.9", .{}),
+            HttpVersion.HTTP10 => try writer.print("HTTP/1.0", .{}),
+            HttpVersion.HTTP11 => try writer.print("HTTP/1.1", .{}),
+        }
+    }
+};
 
 pub const HttpVersionError = error{ HttpVersionNotFound, HttpVersionMalformed };
 
@@ -22,10 +37,6 @@ pub fn find_http_version(request: []const u8) HttpVersionError!HttpVersion {
         version = HttpVersion.HTTP10;
     } else if (std.mem.eql(u8, _version, "HTTP/1.1")) {
         version = HttpVersion.HTTP11;
-    } else if (std.mem.eql(u8, _version, "HTTP/2")) {
-        version = HttpVersion.HTTP2;
-    } else if (std.mem.eql(u8, _version, "HTTP/3")) {
-        version = HttpVersion.HTTP3;
     } else {
         return HttpVersionError.HttpVersionNotFound;
     }

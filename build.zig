@@ -3,6 +3,7 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+
     const mod = b.addModule("zig_http", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
@@ -12,11 +13,11 @@ pub fn build(b: *std.Build) void {
         .name = "zig_http",
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
             .imports = &.{
                 .{ .name = "zig_http", .module = mod },
             },
+            .target = target,
+            .optimize = optimize,
         }),
     });
 

@@ -5,6 +5,7 @@ const posix = @import("std").posix;
 const utils = struct {
     const Request = @import("../../zig_http/utils/request.zig").Request;
     const Response = @import("../../zig_http/utils/response.zig").Response;
+    const HttpCode = @import("../../zig_http/utils/http_codes.zig").HttpCode;
     const write_to_socket = @import("../../zig_http/utils/posix_socket_write.zig").write;
 };
 
@@ -43,32 +44,39 @@ pub fn Server(comptime size: u16) type {
 
                 const socket = posix.accept(self._listener, &client_address.any, &client_address_len, 0) catch |err| {
                     std.debug.print("error accept: {}\n", .{err});
-                    return;
+                    continue;
                 };
-                defer posix.close(socket);
+
+                defer {
+                    const resp = std.fmt.allocPrint(allocator, "{f} {f}\r\n", .{ response._version, response._status }) catch "";
+                    utils.write_to_socket(socket, resp) catch |err| {
+                        std.debug.print("error writing: {}\n", .{err});
+                    };
+                    posix.close(socket);
+                }
 
                 const read = posix.read(socket, self._req) catch |err| {
                     std.debug.print("error reading: {}\n", .{err});
-                    return;
+                    continue;
                 };
 
-                if (read == 0)
-                    return;
+                if (read == 0) continue;
 
                 var request = utils.Request.init(allocator, client_address, self._req.*[0..read]) catch |err| {
-                    std.debug.print("Http message malformed: {}\n", .{err});
+                    std.debug.print(
+                        "Http message malformed \x1b[1;31m{}\n\x1b[1;39mRaw http request:\n{s}\n",
+                        .{ err, self._req.*[0..read] },
+                    );
 
-                    return;
+                    response.write_status(utils.HttpCode.BadRequest);
+                    continue;
                 };
+                (&response)._version = request.version;
                 defer {
                     (&request).deinit();
                 }
 
                 try _loop(allocator, request, &response);
-
-                utils.write_to_socket(socket, (&response).get_body()) catch |err| {
-                    std.debug.print("error writing: {}\n", .{err});
-                };
             }
         }
     };

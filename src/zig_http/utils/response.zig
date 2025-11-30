@@ -7,9 +7,10 @@ pub const Response = struct {
     _version: HttpVersion,
     _buffer: *[1024]u8,
     _buffer_len: usize,
+    _headers: ?std.StringHashMap([]const u8),
 
     pub fn init(buffer: *[1024]u8) @This() {
-        return @This(){ ._status = undefined, ._version = undefined, ._buffer = buffer, ._buffer_len = 0 };
+        return @This(){ ._status = undefined, ._version = undefined, ._buffer = buffer, ._buffer_len = 0, ._headers = null };
     }
 
     pub fn deinit(self: *@This()) void {
@@ -25,16 +26,12 @@ pub const Response = struct {
 
     pub fn write_body(self: *@This(), body: []const u8) void {
         self._buffer_len = body.len;
-        @memcpy(self._buffer[3 .. self._buffer_len + 3], body);
+        @memcpy(self._buffer[0..self._buffer_len], body);
         return;
     }
 
     pub fn get_body(self: *@This()) []const u8 {
-        return self._buffer[3 .. self._buffer_len + 3];
-    }
-
-    pub fn get_status(self: *@This()) [3]u8 {
-        return (self._buffer[0..3].*);
+        return self._buffer[0..self._buffer_len];
     }
 };
 
